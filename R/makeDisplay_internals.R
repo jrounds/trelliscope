@@ -224,7 +224,7 @@ encodePNG <- function(plotLoc) {
 
 # this seems to be the best cross-platform way to copy directories
 # if to exists it will be deleted
-copy_dir <- function(from, to) {
+copy_dir <- function(from, to, overwrite=TRUE) {
   if(file.exists(to))
     unlink(to, recursive = TRUE)
   ff <- list.files(from, recursive = TRUE, full.names = TRUE)
@@ -232,6 +232,7 @@ copy_dir <- function(from, to) {
   upath <- unique(dirname(ff2))
   for(up in upath)
     suppressWarnings(dir.create(up, recursive = TRUE))
-  all(file.copy(ff, ff2, overwrite = TRUE))
+  all(file.copy(ff, ff2, overwrite = overwrite))
 }
+
 
