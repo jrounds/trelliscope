@@ -125,7 +125,7 @@ makeDisplay <- function(
   }
 
   if(verbose) message("* Validating 'panelFn'...")
-  if(!is.null(params)){
+  if(!is.null(params) && class(params) == "list"){
   	environment(panelFn) = list2env(params)
   	environment(cogFn) = list2env(params)
   }
