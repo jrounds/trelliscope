@@ -203,7 +203,7 @@ makeDisplay <- function(
   packages <- c(packages, "trelliscope")
   if(detect.globals)
   	packages <- unique(c(packages, panelGlobals$packages, cogGlobals$packages))
-  globaVarList = list()
+  globalVarList = list()
   if(detect.globals)
   	globalVarList <- c(panelGlobals$vars, cogGlobals$vars)
 
