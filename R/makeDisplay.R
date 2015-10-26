@@ -350,7 +350,7 @@ makeDisplay <- function(
 #' @param group See makeDisplay
 #' @param conn See makeDisplay
 #' @param mode if "update" just tries to update display, if "make" just tries to makeDisplay, and finally if "auto" tries to update and failing that tries to "make".
-#' @param ... parameters updated from makeDisplay which must be in  c("desc", "width", "height", "keySig", "panelFn"). NOTE: panelFn must be the same panelFn type as the original.
+#' @param ... parameters updated from makeDisplay which must be in  c("desc", "width", "height", "keySig","lims", "panelFn"). NOTE: panelFn must be the same panelFn type as the original.
 #'
 #' @return Depends on mode
 #' @export
@@ -361,7 +361,7 @@ updateDisplay <- function(name,..., group = "common", conn = getOption("vdbConn"
 		  args <- list(...)
 		  nms <- names(args)
 		
-		  updateable <- c("panelFn", "desc", "state", "width", "height", "keySig")
+		  updateable <- c("panelFn", "desc", "state", "lims", "width", "height", "keySig")
 		
 		  notup <- setdiff(nms, updateable)
 		  if(length(notup) > 0) {
@@ -378,7 +378,7 @@ updateDisplay <- function(name,..., group = "common", conn = getOption("vdbConn"
 		    nms <- setdiff(nms, noPreRend)
 		  }
 		
-		  for(cur in c("desc", "width", "height", "keySig")) {
+		  for(cur in updateable) {
 		    if(cur %in% nms)
 		      disp[[cur]] <- args[[cur]]
 		      
