@@ -424,8 +424,7 @@ updateDisplay <- function(name,..., group = "common", conn = getOption("vdbConn"
   		makeDisplay(name=name, group=group, conn=conn, ...)	
   	},
   	default = {
-  		tried = try({updateDisplay(name=name, group=group, conn=conn, 
-  			mode="update", ...)}, silent=TRUE)
+  		tried = try({getDisplay(name, group, conn)}, silent=TRUE)
   		if(inherits(tried, "try-error"))
   			return(makeDisplay(name=name, group=group, conn=conn, ...))
   		tried
