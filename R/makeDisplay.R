@@ -343,56 +343,90 @@ makeDisplay <- function(
   return(invisible(displayObj))
 }
 
-updateDisplay <- function(name, group = NULL, conn = getOption("vdbConn"), ...) {
-  args <- list(...)
-  nms <- names(args)
+#' Smart Update Display With Mode
+#'
+#' Can be used to automatically make or update display depending on if it exists (avoiding cognostic recalculation).
+#' @param name See makeDisplay
+#' @param group See makeDisplay
+#' @param conn See makeDisplay
+#' @param mode if "update" just tries to update display, if "make" just tries to makeDisplay, and finally if "auto" tries to update and failing that tries to "make".
+#' @param ... parameters updated from makeDisplay which must be in  c("desc", "width", "height", "keySig", "panelFn"). NOTE: panelFn must be the same panelFn type as the original.
+#'
+#' @return Depends on mode
+#' @export
+updateDisplay <- function(name,..., group = "common", conn = getOption("vdbConn"), mode="update") {
+  	#mode = match.arg(mode, c("update", "make","auto"))
+	switch(mode,
+  	update = {
+		  args <- list(...)
+		  nms <- names(args)
+		
+		  updateable <- c("panelFn", "desc", "state", "width", "height", "keySig")
+		
+		  notup <- setdiff(nms, updateable)
+		  if(length(notup) > 0) {
+		    message("note: the following attributes cannot be used to update a display and will be ignored: ", paste(notup, collapse = ", "))
+		  }
+		
+		  disp <- getDisplay(name, group, conn)
+		
+		  noPreRend <- c("panelFn", "width", "height")
+		  if(disp$preRender) {
+		    if(nms %in% noPreRend)
+		      message("note: preRender is TRUE, so the following cannot be set: ",
+		        paste(noPreRend, collapse = ", "))
+		    nms <- setdiff(nms, noPreRend)
+		  }
+		
+		  for(cur in c("desc", "width", "height", "keySig")) {
+		    if(cur %in% nms)
+		      disp[[cur]] <- args[[cur]]
+		      
+		  }
+		
+		  if("panelFn" %in% nms) {
+		    # panelGlobals <- drGetGlobals(args$panelFn)
+		    # cogGlobals <- drGetGlobals(cogFn)
+		    # packages <- unique(c(packages, panelGlobals$packages, cogGlobals$packages))
+		    # globalVarList <- c(panelGlobals$vars, cogGlobals$vars)
+		   	  panelFnType <- disp$panelFnType
+		   	  panelFn = args$panelFn
+  			  class(panelFn) <- c("function", panelFnType)
+  			  disp$panelFn = panelFn
+		  }
+		
+		  displayObj <- disp
+		  # save(displayObj, file = file.path(tempPrefix, "displayObj.Rdata"))
+		 #
+		  updateDisplayList(list(
+		    group = disp$group,
+		    name = disp$name,
+		    desc = disp$desc,
+		    n = disp$n,
+		    panelFnType = disp$panelFnType,
+		    preRender = disp$preRender,
+		    dataClass = tail(class(disp$panelDataSource), 1),
+		    cogClass = class(disp$cogDatConn)[1],
+		    height = disp$height,
+		    width = disp$width,
+		    updated = Sys.time(),
+		    keySig = disp$keySig
+		  ), conn)
+		  vdbPrefix <- conn$path
+		displayObj = disp
+  		save(displayObj,file = file.path(vdbPrefix, "displays", disp$group, disp$name, "displayObj.Rdata"))
 
-  updateable <- c("panelFn", "desc", "state", "width", "height", "keySig")
-
-  notup <- setdiff(nms, updateable)
-  if(length(notup) > 0) {
-    message("note: the following attributes cannot be used to update a display and will be ignored: ", paste(notup, collapse = ", "))
-  }
-
-  disp <- getDisplay(name, group, conn)
-
-  noPreRend <- c("panelFn", "width", "height")
-  if(disp$preRender) {
-    if(nms %in% noPreRend)
-      message("note: preRender is TRUE, so the following cannot be set: ",
-        paste(noPreRend, collapse = ", "))
-    nms <- setdiff(nms, noPreRend)
-  }
-
-  for(cur in c("desc", "width", "height", "keySig")) {
-    if(cur %in% nms)
-      disp[[cur]] <- args[[cur]]
-  }
-
-  if("panelFn" %in% nms) {
-    # panelGlobals <- drGetGlobals(args$panelFn)
-    # cogGlobals <- drGetGlobals(cogFn)
-    # packages <- unique(c(packages, panelGlobals$packages, cogGlobals$packages))
-    # globalVarList <- c(panelGlobals$vars, cogGlobals$vars)
-  }
-
-  displayObj <- disp
-  # save(displayObj, file = file.path(tempPrefix, "displayObj.Rdata"))
-
-  updateDisplayList(list(
-    group = disp$group,
-    name = disp$name,
-    desc = disp$desc,
-    n = disp$n,
-    panelFnType = disp$panelFnType,
-    preRender = disp$preRender,
-    dataClass = tail(class(disp$panelDataSource), 1),
-    cogClass = class(disp$cogDatConn)[1],
-    height = disp$height,
-    width = disp$width,
-    updated = Sys.time(),
-    keySig = disp$keySig
-  ), conn)
+  	},
+  	make = {
+  		makeDisplay(name=name, group=group, conn=conn, ...)	
+  	},
+  	default = {
+  		tried = try({updateDisplay(name=name, group=group, conn=conn, 
+  			makeOrUpdate="update", ...)}, silent=TRUE)
+  		if(inherits(tried, "try-error"))
+  			return(makeDisplay(name=name, group=group, conn=conn, ...))
+  		tried
+  	})
 }
 
 
@@ -406,5 +440,7 @@ cleanupDisplays <- function(conn = getOption("vdbConn")) {
     unlink(f, recursive = TRUE)
   }
 }
+
+
 
 
