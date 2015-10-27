@@ -20,27 +20,31 @@ copyDisplay = function(old_name, new_name, group="common", conn = getOption("vdb
     if(!copyVerify) {
       stop("Copy files for display were not successfully moved to '", new_path, "'", call. = FALSE)
     } 
-	select = c("group",
-		"name",
-		"desc", 
-		"n",
-      "panelFnType",
-      "preRender",
-      "dataClass", 
-      "cogClass",
-      "height",
-      "width",
-      "updated",
-      "keySig"
-	)
-	subsetDisplayObj =
-	#we have to update the display object
+
+  		save(displayObj,file = file.path(vdbPrefix, "displays", disp$group, disp$name, "displayObj.Rdata"))
+
+
 	display_path = file.path(new_path, "displayObj.Rdata")
 	e = new.env()
 	load(display_path, envir=e)
 	e$displayObj$name = new_name 
+	#there is some renaming here because copy and paste from other snippets
 	displayObj = e$displayObj
 	save(displayObj, file = display_path)
-    updateDisplayList.displayObj(displayObj, conn)
+	disp = displayObj
+	updateDisplayList(list(
+		group = disp$group,
+		name = disp$name,
+		desc = disp$desc,
+		n = disp$n,
+		panelFnType = disp$panelFnType,
+		preRender = disp$preRender,
+		dataClass = tail(class(disp$panelDataSource), 1),
+		cogClass = class(disp$cogDatConn)[1],
+		height = disp$height,
+		width = disp$width,
+		updated = Sys.time(),
+		keySig = disp$keySig
+	), conn)
 
 }
