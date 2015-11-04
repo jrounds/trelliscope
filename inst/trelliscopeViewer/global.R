@@ -1,3 +1,14 @@
+
+
+# untar data if there is any
+dataTar <- file.path("data.tar")
+if(file.exists(dataTar)) {
+  utils::untar(dataTar, exdir = getwd())
+  unlink(dataTar)
+}
+
+
+
 globalsFile = "data/globals.Rdata"
 if(file.exists(globalsFile)){
 	message("Loading data/globals.Rdata")

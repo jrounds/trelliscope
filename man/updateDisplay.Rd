@@ -2,24 +2,24 @@
 % Please edit documentation in R/makeDisplay.R
 \name{updateDisplay}
 \alias{updateDisplay}
-\title{Smart Update Display}
+\title{Smart Update Display With Mode}
 \usage{
-updateDisplay(name, group = "common", conn = getOption("vdbConn"),
-  mode = c("update", "make", "auto"), ...)
+updateDisplay(name, ..., group = "common", conn = getOption("vdbConn"),
+  mode = "update")
 }
 \arguments{
 \item{name}{See makeDisplay}
+
+\item{...}{parameters updated from makeDisplay which must be in  c("desc", "width", "height", "keySig","lims", "panelFn"). NOTE: panelFn must be the same panelFn type as the original.}
 
 \item{group}{See makeDisplay}
 
 \item{conn}{See makeDisplay}
 
 \item{mode}{if "update" just tries to update display, if "make" just tries to makeDisplay, and finally if "auto" tries to update and failing that tries to "make".}
-
-\item{...}{parameters updated from makeDisplay}
 }
 \value{
-Depends on updateOrMake
+Depends on mode
 }
 \description{
 Can be used to automatically make or update display depending on if it exists (avoiding cognostic recalculation).
