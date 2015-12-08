@@ -42,9 +42,11 @@ getDisplay <- function(name, group = NULL, conn = getOption("vdbConn")) {
     cn <- getAttribute(displayObj$panelDataSource, "conn")
     if(!file.exists(cn$loc)) {
       tmp <- file.path(conn$path, "displays", displayObj$group, displayObj$name, "panels")
-      if(!file.exists(tmp))
+      if(!file.exists(tmp)){
         tmp <- file.path(conn$path, "data", basename(cn$loc))
+      }
       if(file.exists(tmp)) {
+      	message("* paneDataSource not found utilizing ", tmp, " instead.")
         if(inherits(displayObj$panelDataSource, "ddf")) {
           displayObj$panelDataSource <- ddf(localDiskConn(tmp, reset = TRUE, verbose = FALSE), verbose = FALSE)
         } else {
